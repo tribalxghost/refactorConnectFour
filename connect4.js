@@ -1,16 +1,20 @@
-
 class Game {
   constructor() {
     this.WIDTH = 7;
     this.HEIGHT = 6;
     this.currPlayer = 1; // active player: 1 or 2
-    this.board = [];
+    this.makeBoard();
+    this.makeHtmlBoard();
 
+    
     
     
   }
+  
 
   makeBoard() {
+    console.log(this)
+    this.board = [];
     for (let y = 0; y < this.HEIGHT; y++) {
       this.board.push(Array.from({ length: this.WIDTH }));
     }
@@ -22,7 +26,7 @@ class Game {
     // make column tops (clickable area for adding a piece to that column)
     const top = document.createElement('tr');
     top.setAttribute('id', 'column-top');
-    top.addEventListener('click', this.handleClick);
+    top.addEventListener('click', this.handleClick.bind(this));
 
     for (let x = 0; x < this.WIDTH; x++) {
       const headCell = document.createElement('td');
@@ -48,7 +52,16 @@ class Game {
 
 
   /** findSpotForCol: given column x, return top empty y (null if filled) */
-
+  findSpotForCol(x) {
+    console.log("HI")
+    for (let y = this.HEIGHT - 1; y >= 0; y--) {
+      if (!this.board[y][x]) {
+        
+        return y;
+      }
+    }
+    return null;
+  }
 
 /** placeInTable: update DOM to place piece into HTML table of board */
 
@@ -73,17 +86,12 @@ endGame(msg) {
 
 handleClick(evt) {
   // get x from ID of clicked cell
-  let x = +evt.target.id;
+  const x = +evt.target.id;
 
   // get next spot in column (if none, ignore click)
-  let y = function (x) {
-    for (let y = HEIGHT - 1; y >= 0; y--) {
-      if (!board[y][x]) {
-        return y;
-      }
-    }
-    return null;
-  }
+  console.dir(this)
+
+  const y = this.findSpotForCol(x)
 
   if (y === null) {
     return;
@@ -91,33 +99,36 @@ handleClick(evt) {
 
   // place piece in board and add to HTML table
   // TODO: add line to update in-memory board
-  console.log(y())
-  board[y][x] = this.currPlayer
-  placeInTable(this.y, x);
+  console.log(y)
+  this.board[y][x] = this.currPlayer
+  this.placeInTable(y, x);
+
+  this.currPlayer === 1 ? this.currPlayer = 2 : this.currPlayer = 1
 
   // check for win
-  if (checkForWin()) {
-    return endGame(`Player ${this.currPlayer} won!`);
+  console.log(this.checkForWin())
+  if (this.checkForWin()) {
+    console.log("END")
+    
+    return this.endGame(`Player ${this.currPlayer} won!`);
   }
 }
 
 /** checkForWin: check board cell-by-cell for "does a win start here?" */
 
 checkForWin() {
-  function _win(cells) {
+  const _win = cells => 
     // Check four cells to see if they're all color of current player
     //  - cells: list of four (y, x) cells
     //  - returns true if all are legal coordinates & all match currPlayer
-
-    return cells.every(
+    cells.every(
       ([y, x]) =>
         y >= 0 &&
         y < this.HEIGHT &&
         x >= 0 &&
         x < this.WIDTH &&
-        board[y][x] === currPlayer
+        this.board[y][x] === this.currPlayer
     );
-  }
 
   for (let y = 0; y < this.HEIGHT; y++) {
     for (let x = 0; x < this.WIDTH; x++) {
@@ -137,6 +148,7 @@ checkForWin() {
 }
 
 }
+new Game
 
 
 /** Connect Four
